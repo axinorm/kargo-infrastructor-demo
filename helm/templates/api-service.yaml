@@ -1,0 +1,22 @@
+{{- with .Values.api.service }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: infrastructor-api
+  labels:
+    app.kubernetes.io/name: infrastructor-api
+    app.kubernetes.io/instance: infrastructor
+    app.kubernetes.io/component: api
+spec:
+  type: NodePort
+  ports:
+    - name: http
+      port: 3000
+      targetPort: 3000
+      nodePort: {{ .nodePort }}
+      protocol: TCP
+  selector:
+    app.kubernetes.io/name: infrastructor-api
+    app.kubernetes.io/instance: infrastructor
+    app.kubernetes.io/component: api
+{{- end -}}

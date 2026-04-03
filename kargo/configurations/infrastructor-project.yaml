@@ -1,0 +1,15 @@
+apiVersion: kargo.akuity.io/v1alpha1
+kind: Project
+metadata:
+  name: infrastructor
+---
+apiVersion: kargo.akuity.io/v1alpha1
+kind: ProjectConfig
+metadata:
+  name: infrastructor
+  namespace: infrastructor
+spec:
+  promotionPolicies:
+  - stageSelector:
+      name: tst
+    autoPromotionEnabled: true

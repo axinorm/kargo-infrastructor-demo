@@ -1,0 +1,17 @@
+apiVersion: kargo.akuity.io/v1alpha1
+kind: Warehouse
+metadata:
+  name: infrastructor
+  namespace: infrastructor
+spec:
+  subscriptions:
+  - image:
+      repoURL: ghcr.io/axinorm/infrastructor-frontend
+      imageSelectionStrategy: SemVer
+      semverConstraint: ^1.0.0
+      discoveryLimit: 5
+  - image:
+      repoURL: ghcr.io/axinorm/infrastructor-api
+      imageSelectionStrategy: SemVer
+      semverConstraint: ^1.0.0
+      discoveryLimit: 5

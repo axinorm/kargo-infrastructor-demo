@@ -1,0 +1,22 @@
+{{- with .Values.frontend.service }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: infrastructor-frontend
+  labels:
+    app.kubernetes.io/name: infrastructor-frontend
+    app.kubernetes.io/instance: infrastructor
+    app.kubernetes.io/component: frontend
+spec:
+  type: NodePort
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 8080
+      nodePort: {{ .nodePort }}
+      protocol: TCP
+  selector:
+    app.kubernetes.io/name: infrastructor-frontend
+    app.kubernetes.io/instance: infrastructor
+    app.kubernetes.io/component: frontend
+{{- end -}}

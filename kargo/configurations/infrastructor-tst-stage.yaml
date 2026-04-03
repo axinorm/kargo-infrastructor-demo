@@ -1,0 +1,62 @@
+apiVersion: kargo.akuity.io/v1alpha1
+kind: Stage
+metadata:
+  name: tst
+  namespace: infrastructor
+  annotations:
+    kargo.akuity.io/color: "#d3d3d3"
+spec:
+  requestedFreight:
+  - origin:
+      kind: Warehouse
+      name: infrastructor
+    sources:
+      direct: true
+  promotionTemplate:
+    spec:
+      # Variables
+      vars:
+        - name: frontendImage
+          value: ghcr.io/axinorm/infrastructor-frontend
+        - name: apiImage
+          value: ghcr.io/axinorm/infrastructor-api
+        - name: repoURL
+          value: ${HELM_REPOSITORY_URL}
+      steps:
+      # Cloning
+      - uses: git-clone
+        config:
+          repoURL: ${{ vars.repoURL }}
+          checkout:
+          - branch: main
+            path: ./repo
+      # Update image tag
+      - uses: yaml-update
+        as: update-image
+        config:
+          path: ./repo/values-tst.yaml
+          updates:
+          - key: frontend.image.tag
+            value: ${{ imageFrom(vars.frontendImage).Tag }}
+          - key: api.image.tag
+            value: ${{ imageFrom(vars.apiImage).Tag }}
+      # Commit changes
+      - uses: git-commit
+        as: commit
+        config:
+          path: ./repo
+          message: |
+            chore(kargo): Updating images to ${{ ctx.stage }}
+            Frontend image to ${{ imageFrom(vars.frontendImage).Tag }}
+            API image to ${{ imageFrom(vars.apiImage).Tag }}
+      # Push changes to main
+      - uses: git-push
+        config:
+          path: ./repo
+          targetBranch: main
+      # Update Argo CD
+      - uses: argocd-update
+        config:
+          apps:
+          - name: infrastructor-tst
+            namespace: argocd

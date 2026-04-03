@@ -1,0 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: infrastructor
+  labels:
+    app.kubernetes.io/name: infrastructor
+    app.kubernetes.io/instance: argo-cd
+spec:
+  clusterResourceWhitelist:
+  - group: '*'
+    kind: '*'
+  destinations:
+  - namespace: infrastructor-tst
+    name: in-cluster
+  - namespace: infrastructor-qua
+    name: in-cluster
+  - namespace: infrastructor-prd
+    name: in-cluster
+  sourceRepos:
+  - '*'

@@ -1,0 +1,48 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: infrastructor
+  labels:
+    app.kubernetes.io/name: infrastructor
+    app.kubernetes.io/instance: argo-cd
+spec:
+  goTemplate: true
+  generators:
+  - list:
+      elements:
+      - environment: tst
+        automated: "true"
+      - environment: qua
+        automated: "true"
+      - environment: prd
+        automated: "false"
+  template:
+    metadata:
+      name: infrastructor-{{ .environment }}
+      annotations:
+        # Very important!
+        # This annotation is used by Kargo to sync Argo CD Application
+        kargo.akuity.io/authorized-stage: infrastructor:{{ .environment }}
+    spec:
+      project: infrastructor
+      source:
+        repoURL: ${HELM_REPOSITORY_URL}
+        targetRevision: main
+        path: .
+        helm:
+          releaseName:  infrastructor-{{ .environment }}
+          valueFiles:
+          - values-{{ .environment }}.yaml
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: infrastructor-{{ .environment }}
+      syncPolicy:
+        syncOptions:
+        - CreateNamespace=true
+  templatePatch: |
+      {{- if eq .automated "true" }}
+      spec:
+        syncPolicy:
+          automated:
+            prune: true
+      {{- end }}
